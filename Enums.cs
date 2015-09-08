@@ -1,19 +1,20 @@
 
 
-namespace sequencetrainlogic{
+namespace SequenceTrainLogic{
 	public enum TrackType{
-		STRAIGHT,
-		CURVED,
-		DOUBLE_STRAIGHT,
-		DOUBLE_CURVED
+		Straight,
+		Curved,
+		DoubleStraight,
+		DoubleCurved,
+		Station
 	}
 	public enum TrackEnds{
-		A,B,NONE
+		None,A,B
 	}
 	public enum TrackSide{
-		NORTH,
-		EAST,
-		SOUTH,
-		WEST
+		North,
+		East,
+		South,
+		West
 	}
 }

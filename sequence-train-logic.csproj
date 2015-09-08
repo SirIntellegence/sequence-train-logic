@@ -7,8 +7,10 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{64D4E4CE-7CE5-43ED-BE35-3AB7DAB72306}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>sequencetrainlogic</RootNamespace>
+    <RootNamespace>SequenceTrainLogic</RootNamespace>
     <AssemblyName>sequence-train-logic</AssemblyName>
+    <SynchReleaseVersion>false</SynchReleaseVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -19,6 +21,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="cp ${TargetFile} Target" workingdir="${ProjectDir}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -27,6 +34,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="cp ${TargetFile} Target" workingdir="${ProjectDir}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -38,6 +50,11 @@
     <Compile Include="EngineOptions.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="SequenceTrainEngine.cs" />
+    <Compile Include="MersenneTwister.cs" />
+    <Compile Include="SimpleBlockTypes.cs" />
+    <Compile Include="ComplexBlockTypes.cs" />
+    <Compile Include="LazyInit.cs" />
+    <Compile Include="GameOverException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
