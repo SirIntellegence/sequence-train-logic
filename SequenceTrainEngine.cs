@@ -81,9 +81,10 @@ namespace SequenceTrainLogic {
 			int rotation = random.Next();
 			AbstractTrackBlock result;
 			if (!_engineOptions.mapWraps &&
-				(x == 0 || x == _engineOptions.gridWidth + 1) &&
-			    (y == 0 || y == _engineOptions.gridHeight + 1)){
-				// it is in a corner
+				(x == 0 || x == _engineOptions.gridWidth - 1 ||
+				y == 0 || y == _engineOptions.gridHeight - 1)){
+				// it is on the edge
+				debugLog(String.Format("[{0}, {1}] is on the edge", x, y));
 				if (random.Next() % 2 == 0){
 					return new DoubleCurvedTrackBlock(x, y, rotation, this);
 				}
@@ -122,6 +123,22 @@ namespace SequenceTrainLogic {
 		/// </summary>
 		public bool tick(){
 			return false;
+		}
+
+		public static event EventHandler<DebugLogArgs> DebugLogEvent;
+
+		private void debugLog(object thing){
+			if (DebugLogEvent != null){
+				DebugLogArgs args = new DebugLogArgs();
+				args.thing = thing;
+				DebugLogEvent(this, args);
+			}
+		}
+		public class DebugLogArgs : EventArgs{
+			public object thing { get; internal set;}
+			public override string ToString() {
+				return string.Format("{0}", thing);
+			}
 		}
 	}
 }
