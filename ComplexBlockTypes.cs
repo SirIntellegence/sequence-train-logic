@@ -48,7 +48,7 @@ namespace SequenceTrainLogic {
 			DoubleStraightTrackBlock parentBlock;
 
 			public DoubleStraightChild(DoubleStraightTrackBlock parentBlock,
-                   int rotationOffset) : base(parentBlock.X, parentBlock.Y,
+                   int rotationOffset) : base(parentBlock.x, parentBlock.y,
                    rotationOffset, parentBlock.parent){
 				this.parentBlock = parentBlock;
 			}
@@ -107,7 +107,7 @@ namespace SequenceTrainLogic {
 			DoubleCurvedTrackBlock parentBlock;
 
 			public DoubleCurvedChild(DoubleCurvedTrackBlock parentBlock,
-                	int rotationOffset) : base(parentBlock.X, parentBlock.Y,
+                	int rotationOffset) : base(parentBlock.x, parentBlock.y,
 			        rotationOffset, parentBlock.parent){
 				this.parentBlock = parentBlock;
 			}

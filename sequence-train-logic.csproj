@@ -55,6 +55,8 @@
     <Compile Include="ComplexBlockTypes.cs" />
     <Compile Include="LazyInit.cs" />
     <Compile Include="GameOverException.cs" />
+    <Compile Include="AbstractTrainCar.cs" />
+    <Compile Include="Train.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
