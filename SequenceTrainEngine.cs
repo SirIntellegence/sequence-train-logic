@@ -12,16 +12,13 @@ namespace SequenceTrainLogic {
 		/// </summary>
 		private int centerX, centerY;
 		private readonly EngineOptions _engineOptions;
-
-		public EngineOptions engineOptions {
-			get {
-				return _engineOptions;
-			}
-		}
+		public readonly ReadonlyEngineOptions EngineOptions;
+		public int currentLevel{ get; private set; }
 
 		private readonly AbstractTrackBlock[,] grid;
 		public SequenceTrainEngine(EngineOptions options){
 			_engineOptions = options;
+			this.EngineOptions = new ReadonlyEngineOptions(options);
 			if (_engineOptions.gridWidth < MinWidth){
 				throw new ArgumentException("gridWidth cannot be less than " + MinWidth);
 			}
@@ -36,6 +33,15 @@ namespace SequenceTrainLogic {
 				throw new InvalidOperationException("Swapping out track under " +
                     "the train is not supported yet.");
 			}
+			if (_engineOptions.couplingLength < 0){
+				throw new ArgumentException("Coupling length cannot be less " +
+					"than 0!");
+			}
+			if (_engineOptions.trainCarLength < 1){
+				throw new ArgumentException("Train car length must be greather " +
+				                            "than 0!");
+			}
+
 			if (_engineOptions.version == null){
 				_engineOptions.trueVersion = CurVersion;
 			}
@@ -80,15 +86,24 @@ namespace SequenceTrainLogic {
 			//give random spin
 			int rotation = random.Next();
 			AbstractTrackBlock result;
-			if (!_engineOptions.mapWraps &&
-				(x == 0 || x == _engineOptions.gridWidth - 1 ||
-				y == 0 || y == _engineOptions.gridHeight - 1)){
-				// it is on the edge
-				debugLog(String.Format("[{0}, {1}] is on the edge", x, y));
-				if (random.Next() % 2 == 0){
+			if (!_engineOptions.mapWraps){
+				if(x == 0 || x == _engineOptions.gridWidth - 1 ||
+					y == 0 || y == _engineOptions.gridHeight - 1) {
+					// it is on the edge
+					debugLog(String.Format("[{0}, {1}] is on the edge", x, y));
+					if(random.Next() % 2 == 0) {
+						return new DoubleCurvedTrackBlock(x, y, rotation, this);
+					}
+					return new CurvedTrackBlock(x, y, rotation, this);
+				}
+				if ((x == 1 || x == _engineOptions.gridWidth - 2) &&
+				         (y == 1 || y == _engineOptions.gridHeight -2)){
+					if (random.Next() % 10 == 0){
+							return new DoubleStraightTrackBlock(x, y, rotation,
+								this);
+					}
 					return new DoubleCurvedTrackBlock(x, y, rotation, this);
 				}
-				return new CurvedTrackBlock(x, y, rotation, this);
 			}
 			
 			TrackType type = (TrackType)(random.Next() %
@@ -125,16 +140,16 @@ namespace SequenceTrainLogic {
 			return false;
 		}
 
-		public static event EventHandler<DebugLogArgs> DebugLogEvent;
+		public static event EventHandler<DebugLogEventArgs> DebugLogEvent;
 
 		private void debugLog(object thing){
 			if (DebugLogEvent != null){
-				DebugLogArgs args = new DebugLogArgs();
+				DebugLogEventArgs args = new DebugLogEventArgs();
 				args.thing = thing;
 				DebugLogEvent(this, args);
 			}
 		}
-		public class DebugLogArgs : EventArgs{
+		public class DebugLogEventArgs : EventArgs{
 			public object thing { get; internal set;}
 			public override string ToString() {
 				return string.Format("{0}", thing);

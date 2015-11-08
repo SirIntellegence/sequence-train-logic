@@ -10,12 +10,12 @@ namespace SequenceTrainLogic {
 		/// </summary>
 		private uint rotationOffset = 0;
 
-		public int X { get; private set;}
-		public int Y { get; private set;}
+		public int x { get; private set;}
+		public int y { get; private set;}
 		protected AbstractTrackBlock(int x, int y, SequenceTrainEngine engine,
             	int rotationOffset) : base (engine) {
-			this.X = x;
-			this.Y = y;
+			this.x = x;
+			this.y = y;
 			this.rotationOffset = unchecked((uint)rotationOffset);
 			edges = new LazyInit<TrackEnds[]>(getTrackEdgeTypes);
 		}
