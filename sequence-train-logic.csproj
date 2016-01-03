@@ -46,7 +46,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AbstractTrackBlock.cs" />
-    <Compile Include="AbtractLogicEngineItem.cs" />
     <Compile Include="EngineOptions.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="SequenceTrainEngine.cs" />
@@ -55,8 +54,12 @@
     <Compile Include="ComplexBlockTypes.cs" />
     <Compile Include="LazyInit.cs" />
     <Compile Include="GameOverException.cs" />
-    <Compile Include="AbstractTrainCar.cs" />
     <Compile Include="Train.cs" />
+    <Compile Include="AbstractLogicEngineItem.cs" />
+    <Compile Include="AbstractTrainCar.cs" />
+    <Compile Include="Locomotive.cs" />
+    <Compile Include="TrainCar.cs" />
+    <Compile Include="Caboose.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

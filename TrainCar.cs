@@ -1,28 +1,29 @@
 using System;
 
 namespace SequenceTrainLogic {
-	public abstract class TrainCar {
-		private readonly Train parent;
-		internal TrainCar(Train parent) {
-			if(parent == null)
-				throw new ArgumentNullException("parent");
-			this.parent = parent;
+	/// <summary>
+	/// Just your ordinary train car, that you need to pickup
+	/// </summary>
+	public class TrainCar : AbstractTrainCar {
+		int num;
+
+		internal TrainCar(int num, Train parent) : base(parent) {
+			if (num < 1){
+				throw new ArgumentOutOfRangeException("num", num, "Value must " +
+				                                      "be greater than 0!");
+			}
+			this.num = num;
 		}
-		public int x { get; internal set;}
-		public int y { get; internal set;}
-		public TrackEnds entry{ get; internal set; }
-		/// <summary>
-		/// How far the Train Car is through the current track block.
-		/// </summary>
-		/// <value>The progress.</value>
-		/// <see cref="EngineOptions.blockSections"/>
-		public int progress { get; internal set; }
-		/// <summary>
-		/// Index of the car in the train. The train engine is 0, the caboose
-		/// is -1
-		/// </summary>
-		/// <value>The index of the train.</value>
-		public abstract int trainIndex{ get; }
+
+		#region implemented abstract members of AbstractTrainCar
+
+		public override int trainIndex {
+			get {
+				return num;
+			}
+		}
+
+		#endregion
 	}
 }
 

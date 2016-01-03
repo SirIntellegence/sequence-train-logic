@@ -1,7 +1,7 @@
 using System;
 
 namespace SequenceTrainLogic {
-	public abstract class AbstractTrackBlock : AbtractLogicEngineItem {
+	public abstract class AbstractTrackBlock : AbstractLogicEngineItem {
 		protected const int EdgesSize = 4;
 		private LazyInit<TrackEnds[]> edges;
 		/// <summary>
