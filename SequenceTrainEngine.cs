@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 
 namespace SequenceTrainLogic {
 	public class SequenceTrainEngine {
@@ -12,8 +13,15 @@ namespace SequenceTrainLogic {
 		/// </summary>
 		private int centerX, centerY;
 		private readonly EngineOptions _engineOptions;
+		private Train train;
 		public readonly ReadonlyEngineOptions EngineOptions;
 		public int currentLevel{ get; private set; }
+		public ReadOnlyCollection<AbstractTrainCar> trainList{
+			get{
+				return train.PublicCarList;
+			}
+		}
+
 
 		private readonly AbstractTrackBlock[,] grid;
 		public SequenceTrainEngine(EngineOptions options){
@@ -53,7 +61,8 @@ namespace SequenceTrainLogic {
 			arraySeed[0] = BitConverter.ToInt32(bytes, 0);
 			arraySeed[1] = BitConverter.ToInt32(bytes, bytes.Length / 2);
 			random.Initialize(arraySeed);
-
+			
+			train = new Train(this);
 			grid = new AbstractTrackBlock[_engineOptions.gridWidth,
 			                              _engineOptions.gridHeight];
 			fillGrid();
@@ -80,6 +89,11 @@ namespace SequenceTrainLogic {
 					grid[x, y] = item;
 				}
 			}
+			Locomotive locomotive = (Locomotive)train.PublicCarList[0];
+			locomotive.x = centerX;
+			locomotive.y = centerY;
+			locomotive.entry = (TrackSide)(random.Next() % (int)TrackSide.West + 1);
+			locomotive.progress = EngineOptions.blockSections / 2;
 		}
 
 		private AbstractTrackBlock generateTrackPiece(int x, int y){
@@ -141,6 +155,9 @@ namespace SequenceTrainLogic {
 		}
 
 		public static event EventHandler<DebugLogEventArgs> DebugLogEvent;
+		public event GenericEventHandler<AbstractTrainCar> NewTrainCar;
+		public event GenericEventHandler<AbstractTrainCar> TrainCarAttached;
+
 
 		private void debugLog(object thing){
 			if (DebugLogEvent != null){
@@ -149,12 +166,20 @@ namespace SequenceTrainLogic {
 				DebugLogEvent(this, args);
 			}
 		}
-		public class DebugLogEventArgs : EventArgs{
-			public object thing { get; internal set;}
-			public override string ToString() {
-				return string.Format("{0}", thing);
-			}
+	}
+	public delegate void GenericEventHandler<T>(Object sender, GenericEventArgs<T> args);
+	public class DebugLogEventArgs : EventArgs{
+		public object thing {get; internal set;}
+		public override String ToString(){
+			return String.Format("{0}", thing);
 		}
 	}
+	public class GenericEventArgs<T> : EventArgs{
+		public T thing { get; private set;}
+		public GenericEventArgs(T item){
+			thing = item;
+		}
+	}
+
 }
 

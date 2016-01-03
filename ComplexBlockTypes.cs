@@ -49,7 +49,7 @@ namespace SequenceTrainLogic {
 
 			public DoubleStraightChild(DoubleStraightTrackBlock parentBlock,
                    int rotationOffset) : base(parentBlock.x, parentBlock.y,
-                   rotationOffset, parentBlock.parent){
+                   rotationOffset, parentBlock.Parent){
 				this.parentBlock = parentBlock;
 			}
 			public override bool rotate(bool clockwize) {
@@ -108,7 +108,7 @@ namespace SequenceTrainLogic {
 
 			public DoubleCurvedChild(DoubleCurvedTrackBlock parentBlock,
                 	int rotationOffset) : base(parentBlock.x, parentBlock.y,
-			        rotationOffset, parentBlock.parent){
+			        rotationOffset, parentBlock.Parent){
 				this.parentBlock = parentBlock;
 			}
 			public override bool rotate(bool clockwize) {
