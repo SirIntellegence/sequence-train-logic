@@ -80,6 +80,9 @@ namespace SequenceTrainLogic {
 		/// <returns>true if the tile was rotated, false otherwise. One reason
 		/// a block won't rotate is if the train is on top of it.</returns>
 		public virtual bool rotate(bool clockwize){
+			if (Parent.isTrainOnTrack(this)){
+				return false;
+			}
 			if (clockwize){
 				rotationOffset++;
 			}
