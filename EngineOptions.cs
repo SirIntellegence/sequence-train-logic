@@ -38,6 +38,10 @@ namespace SequenceTrainLogic {
 		/// </summary>
 		public int couplingLength;
 		public int? version;
+		/// <summary>
+		/// How many speed variables there are
+		/// </summary>
+		public int speedCount;
 		internal int trueVersion;
 		public ulong seed;
 	}
@@ -94,6 +98,11 @@ namespace SequenceTrainLogic {
 		internal int trueVersion { get { return options.trueVersion; } }
 
 		public ulong seed { get { return options.seed; } }
+		
+		/// <summary>
+		/// How many speed variables there are
+		/// </summary>
+		public int speedCount { get { return options.speedCount; } }
 
 	}
 }

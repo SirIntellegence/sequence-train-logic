@@ -14,6 +14,11 @@ namespace SequenceTrainLogic {
 		private int centerX, centerY;
 		private readonly EngineOptions _engineOptions;
 		private Train train;
+		private readonly int[] speeds;
+		private int curSpeedIndex;
+		private bool gameOverHappened = false;
+		private int tickCount = 0;
+		private int levelTicks = 0;
 		public readonly ReadonlyEngineOptions EngineOptions;
 		public int currentLevel{ get; private set; }
 		public ReadOnlyCollection<AbstractTrainCar> trainList{
@@ -49,6 +54,10 @@ namespace SequenceTrainLogic {
 				throw new ArgumentException("Train car length must be greather " +
 				                            "than 0!");
 			}
+			if (_engineOptions.speedCount < 1){
+				throw new ArgumentException("Speed count cannot be less than " +
+				                            "1!");
+			}
 
 			if (_engineOptions.version == null){
 				_engineOptions.trueVersion = CurVersion;
@@ -56,6 +65,8 @@ namespace SequenceTrainLogic {
 			else{
 				_engineOptions.trueVersion = (int)_engineOptions.version;
 			}
+			speeds = new int[_engineOptions.speedCount];
+			curSpeedIndex = 0;
 			int[] arraySeed = new int[2];
 			byte[] bytes = BitConverter.GetBytes(_engineOptions.seed);
 			arraySeed[0] = BitConverter.ToInt32(bytes, 0);
@@ -151,7 +162,160 @@ namespace SequenceTrainLogic {
 		/// <see cref="GameOverException"/> if the train crashes
 		/// </summary>
 		public bool tick(){
-			return false;
+			if (gameOverHappened){
+				return false;
+			}
+			updatePossibleSpeeds();
+			moveTrain();
+			tickCount++;
+			levelTicks++;
+			if (tickCount % 100 == 0){
+				debugLog(tickCount + " ticks have happened");
+			}
+			return true;
+		}
+
+		private void moveTrain() {
+			int speed = speeds[curSpeedIndex];
+			AbstractTrainCar crashCar = null;
+			foreach (var item in trainList) {
+				int sections = item.progress;
+				sections += speed;
+				AbstractTrackBlock curBlock = this[item.x, item.y];
+				TrackSide entry = item.entry;
+				while (sections > EngineOptions.blockSections){
+					sections -= EngineOptions.blockSections;
+					TrackSide entrySide = entry;
+					//discover the output edge
+					AbstractTrackBlock subBlock = curBlock.getPieceOnSide(
+						entrySide);
+					TrackEnds endOnSide = subBlock.getEndOnSide(entrySide);
+					//find the side the other end is on
+					TrackEnds otherEnd = endOnSide == TrackEnds.A ?
+						TrackEnds.B : TrackEnds.A;
+					TrackSide exit = (TrackSide)(-1);
+					TrackEnds[] ends = subBlock.getTrackEnds();
+					for(int i = 0; i < (int)TrackSide.West + 1; i++) {
+						if (ends[i] == otherEnd){
+							exit = (TrackSide)i;
+							break;
+						}
+					}
+					AbstractTrackBlock nextBlock = getAdjacentBlock(
+						curBlock, exit, true);
+					if (nextBlock == null){
+						//crash
+						crashCar = item;
+						//so other blocks will travel the right distance...
+						speed -= sections;
+						sections = EngineOptions.blockSections;
+					}
+					else{
+						curBlock = nextBlock;
+						entry = invertSide(exit);
+					}
+				}
+				item.progress = sections;
+				item.x = curBlock.x;
+				item.y = curBlock.y;
+				item.entry = entry;
+				debugLog("Car " + item.trainIndex + " is now at " + item.x +","+
+				         item.y+ " and " + item.progress +"sections entering " +
+				         	"from side " + item.entry +".");
+			}
+			if (crashCar != null){
+				gameOverHappened = true;
+				throw new GameOverException(crashCar);
+			}
+		}
+
+		void updatePossibleSpeeds() {
+			if(levelTicks % 100 != 0) {
+				return;
+			}
+			var multiplier = levelTicks / 100;
+			for(int i = 0; i < speeds.Length; i++) {
+				int baseSpeed = EngineOptions.blockSections / 100;
+				if (baseSpeed == 0){
+					baseSpeed = 1;
+				}
+				speeds[i] = 1;
+//					(EngineOptions.blockSections/100) * (currentLevel + 1) *
+//					(multiplier + 1 + i);
+				debugLog("Speed " + i + " is " + speeds[i]);
+			}
+		}
+
+		/// <summary>
+		/// Get the train block adjacent to this one, optionally only if it
+		/// connects to this one. Returns null if one was not found or if
+		/// <code>connectingOnly</code> and the found one is not connected.
+		/// </summary>
+		/// <returns>The adjacent block.</returns>
+		/// <param name="source">Source.</param>
+		/// <param name="direction">Direction.</param>
+		private AbstractTrackBlock getAdjacentBlock(AbstractTrackBlock source,
+		                                            TrackSide direction,
+		                                            bool connectingOnly){
+			TrackEnds side = source.getEndOnSide(direction);
+			if (connectingOnly && side == TrackEnds.None){
+				return null;
+			}
+			AbstractTrackBlock result;
+			switch (direction) {
+				case TrackSide.North:
+					if(source.y == 0) {
+						return null;
+					}
+					result = this[source.x, source.y - 1];
+					break;
+				case TrackSide.East:
+					if(source.x == 0) {
+						return null;
+					}
+					result = this[source.x - 1, source.y];
+					break;
+				case TrackSide.South:
+					if(source.y == EngineOptions.gridHeight - 1) {
+						return null;
+					}
+					result = this[source.x, source.y + 1];
+					break;
+				case TrackSide.West:
+					if(source.x == EngineOptions.gridWidth - 1) {
+						return null;
+					}
+					result = this[source.x + 1, source.y];
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			if (!connectingOnly){
+				return result;
+			}
+			TrackSide otherSide = invertSide(direction);
+			TrackEnds otherEnd = result.getEndOnSide(otherSide);
+			if (otherEnd == TrackEnds.None){
+				return null;
+			}
+			return result;
+		}
+
+		internal static TrackSide invertSide(TrackSide side) {
+			//using something more readable than this...
+//			return (TrackSide)((int)((int)side + TrackSide.West) % (int)TrackSide.West + 1);
+			switch (side) {
+				case TrackSide.North:
+					return TrackSide.South;
+				case TrackSide.East:
+					return TrackSide.West;
+				case TrackSide.South:
+					return TrackSide.North;
+				case TrackSide.West:
+					return TrackSide.East;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		public static event EventHandler<DebugLogEventArgs> DebugLogEvent;
@@ -165,6 +329,15 @@ namespace SequenceTrainLogic {
 				args.thing = thing;
 				DebugLogEvent(this, args);
 			}
+		}
+
+		internal bool isTrainOnTrack(AbstractTrackBlock block){
+			foreach (var item in trainList) {
+				if (item.x == block.x && item.y == block.y){
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	public delegate void GenericEventHandler<T>(Object sender, GenericEventArgs<T> args);

@@ -4,7 +4,14 @@ namespace SequenceTrainLogic {
 	
 	[Serializable]
 	public class GameOverException : Exception {
+		public AbstractTrainCar crashCar {
+			get;
+			private set;
+		}
 
+		public GameOverException(AbstractTrainCar crashCar){
+			this.crashCar = crashCar;
+		}
 
 
 //		/// <summary>
